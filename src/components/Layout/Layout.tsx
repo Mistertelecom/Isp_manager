@@ -16,17 +16,18 @@ const Layout = ({ children }: LayoutProps) => {
   };
 
   return (
-    <Box sx={{ display: 'flex', minHeight: '100vh' }}>
+    <Box sx={{ display: 'flex', height: '100vh', overflow: 'hidden' }}>
       <CssBaseline />
       <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
       <Box
         component="main"
         sx={{
           flexGrow: 1,
-          minHeight: '100vh',
+          height: '100vh',
           display: 'flex',
           flexDirection: 'column',
           bgcolor: theme.palette.background.default,
+          overflow: 'hidden',
         }}
       >
         <Topbar onSidebarOpen={toggleSidebar} />
@@ -35,7 +36,8 @@ const Layout = ({ children }: LayoutProps) => {
           sx={{
             flexGrow: 1,
             p: 3,
-            overflow: 'auto',
+            overflowY: 'auto',
+            overflowX: 'hidden',
           }}
         >
           {children}

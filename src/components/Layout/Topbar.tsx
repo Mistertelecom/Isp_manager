@@ -15,7 +15,7 @@ import {
 import MenuIcon from '@mui/icons-material/Menu';
 import NotificationsIcon from '@mui/icons-material/Notifications';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
-import SearchIcon from '@mui/icons-material/Search';
+import SearchBar from '../SearchBar';
 import LogoutIcon from '@mui/icons-material/Logout';
 import SettingsIcon from '@mui/icons-material/Settings';
 
@@ -59,11 +59,7 @@ const Topbar = ({ onSidebarOpen }: TopbarProps) => {
         <Box sx={{ flexGrow: 1 }} />
 
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-          <Tooltip title="Buscar">
-            <IconButton color="inherit">
-              <SearchIcon />
-            </IconButton>
-          </Tooltip>
+          <SearchBar />
 
           <Tooltip title="Notificações">
             <IconButton color="inherit">
