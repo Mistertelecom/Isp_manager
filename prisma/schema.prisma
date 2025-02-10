@@ -1,0 +1,269 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id            Int       @id @default(autoincrement())
+  email         String    @unique
+  name          String
+  password      String
+  role          Role      @default(USER)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  notifications Notification[]
+}
+
+model Customer {
+  id            Int       @id @default(autoincrement())
+  name          String
+  cpfCnpj       String    @unique
+  email         String?
+  phone         String
+  mobilePhone   String?
+  address       String
+  number        String
+  complement    String?
+  neighborhood  String
+  city          String
+  state         String
+  zipCode       String
+  status        Status    @default(ACTIVE)
+  notes         String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  servicePoints ServicePoint[]
+  serviceOrders ServiceOrder[]
+  contracts     Contract[]
+  documents     Document[]
+  tickets       Ticket[]
+}
+
+model ServicePoint {
+  id            Int       @id @default(autoincrement())
+  customerId    Int
+  customer      Customer  @relation(fields: [customerId], references: [id])
+  address       String
+  number        String
+  complement    String?
+  neighborhood  String
+  city          String
+  state         String
+  zipCode       String
+  coordinates   String?
+  type          PointType
+  status        Status    @default(ACTIVE)
+  equipment     String?
+  ipAddress     String?
+  macAddress    String?
+  vlan          Int?
+  notes         String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  contracts     Contract[]
+}
+
+model Plan {
+  id            Int       @id @default(autoincrement())
+  name          String
+  description   String?
+  downloadSpeed Int       // in Mbps
+  uploadSpeed   Int       // in Mbps
+  price         Float
+  type          PlanType
+  status        Status    @default(ACTIVE)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  contracts     Contract[]
+}
+
+model Contract {
+  id              Int           @id @default(autoincrement())
+  customerId      Int
+  customer        Customer      @relation(fields: [customerId], references: [id])
+  servicePointId  Int
+  servicePoint    ServicePoint  @relation(fields: [servicePointId], references: [id])
+  planId          Int
+  plan            Plan          @relation(fields: [planId], references: [id])
+  status          Status        @default(ACTIVE)
+  installationFee Float?
+  monthlyPayment  Float
+  dueDay          Int
+  startDate       DateTime
+  endDate         DateTime?
+  notes           String?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  invoices        Invoice[]
+}
+
+model Invoice {
+  id          Int           @id @default(autoincrement())
+  contractId  Int
+  contract    Contract      @relation(fields: [contractId], references: [id])
+  amount      Float
+  dueDate     DateTime
+  paidDate    DateTime?
+  status      PaymentStatus @default(PENDING)
+  paymentType PaymentType?
+  notes       String?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+}
+
+model NetworkDevice {
+  id          Int         @id @default(autoincrement())
+  name        String
+  type        DeviceType
+  model       String
+  ipAddress   String
+  macAddress  String?
+  location    String?
+  status      Status      @default(ACTIVE)
+  notes       String?
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+}
+
+model ServiceOrder {
+  id          Int         @id @default(autoincrement())
+  customerId  Int
+  customer    Customer    @relation(fields: [customerId], references: [id])
+  type        OrderType
+  status      OrderStatus @default(PENDING)
+  priority    Priority    @default(NORMAL)
+  description String
+  solution    String?
+  scheduledTo DateTime?
+  completedAt DateTime?
+  technician  String?
+  cost        Float?
+  notes       String?
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+}
+
+model Document {
+  id          Int       @id @default(autoincrement())
+  customerId  Int
+  customer    Customer  @relation(fields: [customerId], references: [id])
+  type        String
+  name        String
+  path        String
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model Ticket {
+  id          Int         @id @default(autoincrement())
+  customerId  Int
+  customer    Customer    @relation(fields: [customerId], references: [id])
+  title       String
+  description String
+  status      TicketStatus @default(OPEN)
+  priority    Priority     @default(NORMAL)
+  category    String
+  assignedTo  String?
+  resolvedAt  DateTime?
+  solution    String?
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+}
+
+model Notification {
+  id        Int       @id @default(autoincrement())
+  userId    Int
+  user      User      @relation(fields: [userId], references: [id])
+  title     String
+  message   String
+  read      Boolean   @default(false)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+enum Role {
+  ADMIN
+  TECHNICIAN
+  SUPPORT
+  FINANCIAL
+  USER
+}
+
+enum Status {
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+  CANCELLED
+}
+
+enum PointType {
+  FIBER
+  WIRELESS
+  CABLE
+}
+
+enum PlanType {
+  RESIDENTIAL
+  BUSINESS
+  CORPORATE
+  CUSTOM
+}
+
+enum DeviceType {
+  OLT
+  ROUTER
+  SWITCH
+  ONT
+  RADIO
+}
+
+enum OrderType {
+  INSTALLATION
+  MAINTENANCE
+  REMOVAL
+  SUPPORT
+  UPGRADE
+  DOWNGRADE
+}
+
+enum OrderStatus {
+  PENDING
+  SCHEDULED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+enum Priority {
+  LOW
+  NORMAL
+  HIGH
+  URGENT
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  OVERDUE
+  CANCELLED
+}
+
+enum PaymentType {
+  CASH
+  CREDIT_CARD
+  DEBIT_CARD
+  BANK_TRANSFER
+  PIX
+  BOLETO
+}
+
+enum TicketStatus {
+  OPEN
+  IN_PROGRESS
+  RESOLVED
+  CLOSED
+}
